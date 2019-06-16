@@ -2,7 +2,7 @@ import * as React from "react"
 import { observable, action } from "mobx"
 import { observer } from "mobx-react"
 
-import StoreContext from "store/context"
+import { StoreContext } from "store"
 
 @observer
 export default class LoginPrompt extends React.Component {

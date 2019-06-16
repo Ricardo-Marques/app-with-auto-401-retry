@@ -1,7 +1,7 @@
 import * as React from "react"
 import { observer } from "mobx-react"
 
-import StoreContext from "store/context"
+import { StoreContext } from "store"
 
 @observer
 export default class TodoList extends React.Component {

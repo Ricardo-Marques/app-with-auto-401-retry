@@ -1,12 +1,15 @@
 import { action, observable, computed } from "mobx"
 
-import AppStore from "./index"
+import { AppStore } from "./index"
 import getMockData from "./mockData"
 
 let requestId: string
 
 export class HttpStore {
   _appStore: AppStore
+  constructor(appStore: AppStore) {
+    this._appStore = appStore
+  }
 
   @observable failedRequests: {
     [requestId: string]: {
@@ -16,10 +19,6 @@ export class HttpStore {
     }
   } = {}
   @observable shouldFailRequests: boolean = false
-
-  constructor(appStore: AppStore) {
-    this._appStore = appStore
-  }
 
   @computed get requestsFailedDueToAuthRequired() {
     return Object.keys(this.failedRequests).filter(requestId => {

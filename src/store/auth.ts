@@ -1,11 +1,10 @@
 import { observable, action } from "mobx"
 
-import AppStore from "./index"
+import { AppStore } from "./index"
 import { Response } from "./http"
 
 export class AuthStore {
   _appStore: AppStore
-
   constructor(appStore: AppStore) {
     this._appStore = appStore
   }

@@ -3,16 +3,13 @@ import * as ReactDOM from "react-dom"
 
 import "store/config"
 import AppUI from "ui"
-import StoreContext, { Store } from "store/context"
+import { Store, StoreContext } from "store"
 
 const renderApp = (
   root: Element,
   _AppUI: typeof AppUI,
   _StoreContext: typeof StoreContext
 ) => {
-  // @ts-ignore
-  window.store = Store
-
   ReactDOM.render(
     <_StoreContext.Provider value={Store}>
       <_AppUI />
@@ -30,8 +27,8 @@ if (module.hot) {
     renderApp(root, AppUI, StoreContext)
   })
 
-  module.hot.accept("./store/context", function() {
-    const StoreContext = require("./store/context")
+  module.hot.accept("./store", function() {
+    const { StoreContext } = require("./store")
     renderApp(root, AppUI, StoreContext)
   })
 }

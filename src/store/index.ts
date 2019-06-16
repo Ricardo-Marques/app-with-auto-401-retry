@@ -1,14 +1,10 @@
+import * as React from "react"
+
 import { AuthStore } from "./auth"
 import { HttpStore } from "./http"
 import { TodosStore } from "./todos"
 
-export interface AppStoreStructure {
-  auth: AuthStore
-  http: HttpStore
-  todos: TodosStore
-}
-
-export default class AppStore implements AppStoreStructure {
+export class AppStore {
   auth: AuthStore
   http: HttpStore
   todos: TodosStore
@@ -19,3 +15,6 @@ export default class AppStore implements AppStoreStructure {
     this.todos = new TodosStore(this)
   }
 }
+
+export const Store = new AppStore()
+export const StoreContext = React.createContext(Store)

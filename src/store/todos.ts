@@ -1,7 +1,7 @@
 import { action, observable, computed } from "mobx"
 
+import { AppStore } from "./index"
 import { Response } from "./http"
-import AppStore from "./index"
 
 export class TodosStore {
   _appStore: AppStore
@@ -10,6 +10,14 @@ export class TodosStore {
   }
 
   @observable _list: Todo[]
+
+  @computed get list() {
+    if (this._list == null) {
+      this.fetchTodos()
+    } else {
+      return this._list
+    }
+  }
 
   @action fetchTodos() {
     return this._appStore.http
@@ -21,28 +29,8 @@ export class TodosStore {
         this.setTodos(res.data)
       })
   }
-  @action addTodo(text: string) {
-    const todoId = String(new Date().valueOf())
-
-    this.list.push({
-      id: todoId,
-      done: false,
-      text
-    })
-  }
   @action setTodos(todos: Todo[]) {
     this._list = todos
-  }
-  @action markTodoAsDone(id: string) {
-    this.list.find(todo => todo.id === id).done = true
-  }
-
-  @computed get list() {
-    if (this._list == null) {
-      this.fetchTodos()
-    } else {
-      return this._list
-    }
   }
 }
 
