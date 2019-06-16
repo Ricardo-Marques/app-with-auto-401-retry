@@ -1,0 +1,30 @@
+{
+  "name": "login-auto-retry-failed-requsts",
+  "version": "1.0.0",
+  "scripts": {
+    "start": "webpack-dev-server --config webpack.config.js --color --progress"
+  },
+  "author": "Ricardo Marques",
+  "license": "MIT",
+  "dependencies": {
+    "mobx": "^5.10.1",
+    "mobx-react": "^6.0.3",
+    "react": "^16.8.6",
+    "react-dom": "^16.8.6",
+    "styled-components": "^4.3.1"
+  },
+  "devDependencies": {
+    "@types/react": "^16.8.19",
+    "@types/react-dom": "^16.8.4",
+    "@types/styled-components": "^4.1.16",
+    "@types/webpack-env": "^1.13.9",
+    "file-loader": "^4.0.0",
+    "html-webpack-plugin": "^3.2.0",
+    "ts-loader": "^6.0.2",
+    "typescript": "^3.5.1",
+    "url-loader": "^2.0.0",
+    "webpack": "^4.33.0",
+    "webpack-cli": "^3.3.4",
+    "webpack-dev-server": "^3.7.1"
+  }
+}
