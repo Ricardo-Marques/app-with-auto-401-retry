@@ -2,6 +2,7 @@ import { action, observable, computed } from "mobx"
 
 import { AppStore } from "./index"
 import getMockData from "./mockData"
+import { rejects } from "assert"
 
 let requestId: string
 
@@ -15,7 +16,7 @@ export class HttpStore {
     [requestId: string]: {
       request: Request
       response: Response<any>
-      resolver: (value: any) => void
+      retry: () => void
     }
   } = {}
   @observable shouldFailRequests: boolean = false
@@ -33,7 +34,8 @@ export class HttpStore {
       setTimeout(() => {
         if (this.shouldFailRequests) {
           const response = { status: 401, error: "Please authenticate." }
-          this.setFailedRequest(request, response, res)
+          this.setFailedRequest(request, response, request.retry)
+          rej(response)
         } else {
           const data = getMockData(request.url)
           if (data != null) {
@@ -48,21 +50,16 @@ export class HttpStore {
 
   @action retryRequestsFailedDueToAuthRequired() {
     this.requestsFailedDueToAuthRequired.forEach(requestId => {
-      this.makeRequest(this.failedRequests[requestId].request).then(
-        action(response => {
-          this.failedRequests[requestId].resolver(response)
-
-          this.clearFailedRequest(requestId)
-        })
-      )
+      this.failedRequests[requestId].retry()
+      this.clearFailedRequest(requestId)
     })
   }
   @action setFailedRequest(
     request: Request,
-    response: Response<any>,
-    resolver: () => void
+    response: Response,
+    retry?: () => void
   ) {
-    this.failedRequests[requestId] = { request, response, resolver }
+    this.failedRequests[requestId] = { request, response, retry }
   }
   @action clearFailedRequest(requestId: string) {
     delete this.failedRequests[requestId]
@@ -76,9 +73,10 @@ export type Request = {
   url: string
   method: "GET" | "PUT" | "PATCH" | "POST" | "DELETE"
   body?: any
+  retry?: () => void
 }
 
-export type Response<Data> = {
+export type Response<Data = void> = {
   status: number
   data?: Data
   error?: string

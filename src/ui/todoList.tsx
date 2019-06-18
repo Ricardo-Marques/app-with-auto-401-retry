@@ -2,32 +2,36 @@ import * as React from "react"
 import { observer } from "mobx-react"
 
 import { StoreContext } from "store"
+import { Todo } from "store/todos"
 
-@observer
-export default class TodoList extends React.Component {
-  static contextType = StoreContext
-  context!: React.ContextType<typeof StoreContext>
+export default observer(function TodoList() {
+  const { todos } = React.useContext(StoreContext)
 
-  componentDidMount() {
-    const { todos } = this.context
-    setInterval(() => todos.fetchTodos(), 2000)
-  }
+  return todos.list.current().case({
+    pending: staleValue => {
+      // this will currently throw an error unless the type definition file is edited directly https://github.com/mobxjs/mobx-utils/pull/208
+      return (
+        <>
+          <span>Loading todos...</span>
+          {staleValue != null && <Todos todos={staleValue} />}
+        </>
+      )
+    },
+    fulfilled: todos => <Todos todos={todos} />,
+    rejected: () => <span>Failed gettings todos :(</span>
+  })
+})
 
-  render() {
-    const { todos } = this.context
+function Todos(props: { todos: Array<Todo> }) {
+  return (
+    <>
+      {props.todos.map(todo => (
+        <Todo key={todo.id} todo={todo} />
+      ))}
+    </>
+  )
+}
 
-    if (todos.list == null) {
-      return <div>Loading todos...</div>
-    }
-
-    return (
-      <>
-        {todos.list.map(todo => (
-          <div key={todo.id}>
-            <div>{todo.text}</div>
-          </div>
-        ))}
-      </>
-    )
-  }
+function Todo(props: { todo: Todo }) {
+  return <div>{props.todo.text}</div>
 }

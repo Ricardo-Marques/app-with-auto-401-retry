@@ -1,41 +1,57 @@
-import { action, observable, computed } from "mobx"
+import {
+  fromPromise,
+  IPromiseBasedObservable,
+  lazyObservable,
+  ILazyObservable
+} from "mobx-utils"
 
 import { AppStore } from "./index"
 import { Response } from "./http"
 
 export class TodosStore {
-  _appStore: AppStore
+  private _appStore: AppStore
   constructor(appStore: AppStore) {
     this._appStore = appStore
   }
 
-  @observable _list: Todo[]
+  list: ILazyObservable<IPromiseBasedObservable<Todo[]>> = fromLazyPromise(
+    () =>
+      this._appStore.http
+        .makeRequest({
+          url: "todos",
+          method: "GET",
+          retry: this.list.refresh
+        })
+        .then((res: Response<Todo[]>) => res.data),
+    () => this.list.current()
+  )
 
-  @computed get list() {
-    if (this._list == null) {
-      this.fetchTodos()
-    } else {
-      return this._list
-    }
-  }
-
-  @action fetchTodos() {
-    return this._appStore.http
-      .makeRequest({
-        url: "todos",
-        method: "GET"
-      })
-      .then((res: Response<Todo[]>) => {
-        this.setTodos(res.data)
-      })
-  }
-  @action setTodos(todos: Todo[]) {
-    this._list = todos
-  }
+  polledList = fromPolledLazyPromise(() => this.list, 2000)
 }
 
 export type Todo = {
   id: string
   done: boolean
   text: string
+}
+
+function fromLazyPromise<T>(
+  fetch: () => PromiseLike<T>,
+  oldPromiseFetch: () => IPromiseBasedObservable<T>
+) {
+  return lazyObservable<IPromiseBasedObservable<T>>(sink => {
+    sink(fromPromise(fetch(), oldPromiseFetch()))
+  })
+}
+
+function fromPolledLazyPromise<T>(
+  lazyPromiseFetch: () => ILazyObservable<IPromiseBasedObservable<T>>,
+  pollFrequency: number
+) {
+  return lazyObservable<IPromiseBasedObservable<T>>(sink => {
+    setInterval(() => {
+      lazyPromiseFetch().refresh()
+      sink(lazyPromiseFetch().current())
+    }, pollFrequency)
+  })
 }
